@@ -19,7 +19,7 @@ bool isRightDir = true;  // true Right, false Left
 bool isDirChanged = true;
 uint8_t angleStep = 1;
 
-uint8_t probability[10] = {5, 7, 8, 9, 10, 13, 14, 15, 20, 30};
+uint8_t probability[10] = {5, 6, 7, 8, 10, 12, 13, 15, 20, 30};
 
 void calculateServoAngle() {
   isDirChanged = false;
@@ -67,7 +67,7 @@ void setup() {
 
   servo = Servo_attach(PIN_SERVO);
 
-  blink(3, true);
+  blink(2, true);
 
   angle = ANGLE_MID;
   Servo_write(servo, angle);
@@ -98,7 +98,11 @@ void loop() {
 
   if (isDirChanged) {
     delay(1000);
-    blink(2, true);
+    if (75 < angle && angle < 115) {
+      blink(1, true);
+    } else {
+      blink(2, true);
+    }
     delay(1000);
   }
 
