@@ -11,100 +11,103 @@
 
 Servo servo;
 
-uint8_t angle = 0;  // 0~180. Center 90
-uint8_t minAngle = 45;
-uint8_t maxAngle = 135;
+int currentAngle = 90; // 0~180. Center 90
+int minAngle = 45;
+int maxAngle = 135;
 
-bool isRightDir = true;  // true Right, false Left
-bool isDirChanged = true;
-uint8_t angleStep = 1;
+bool isRightDir = true; // true Right, false Left
 
-uint8_t probability[10] = {5, 6, 7, 8, 10, 12, 13, 15, 20, 30};
-
-void calculateServoAngle() {
-  isDirChanged = false;
-  if (isRightDir) {
-    angle += angleStep;
-  } else {
-    angle -= angleStep;
-  }
-  if (angle > maxAngle) {
-    isRightDir = false;
-    angle = maxAngle;
-    isDirChanged = true;
-  } else if (angle < minAngle) {
-    isRightDir = true;
-    angle = minAngle;
-    isDirChanged = true;
-  }
-}
-
-void blink(int times, bool isOn) {
-  for (int i = 0; i < times; i++) {
+void blink(int times, bool isOn)
+{
+  for (int i = 0; i < times; i++)
+  {
     analogWrite(PIN_EYE, 63);
-    delay(300);
+    delay(250);
     analogWrite(PIN_EYE, 127);
-    delay(300);
+    delay(250);
     analogWrite(PIN_EYE, 195);
-    delay(300);
+    delay(250);
     analogWrite(PIN_EYE, 255);
-    delay(300);
+    delay(250);
     analogWrite(PIN_EYE, 195);
-    delay(300);
+    delay(250);
     analogWrite(PIN_EYE, 127);
-    delay(300);
+    delay(250);
     analogWrite(PIN_EYE, 31);
-    delay(300);
+    delay(250);
   }
   analogWrite(PIN_EYE, isOn ? BRIGHT : 0);
 }
 
-void setup() {
+void moveServo(int targetAngle, int step)
+{
+  int lastAngle = currentAngle;
+
+  if (currentAngle < targetAngle)
+  { // 30 => 90
+    targetAngle = min(targetAngle, maxAngle);
+    for (int nextAngle = currentAngle; nextAngle < targetAngle; nextAngle += step)
+    {
+      nextAngle = min(nextAngle, maxAngle);
+      Servo_write(servo, nextAngle);
+      delay(100);
+      lastAngle = nextAngle;
+    }
+  }
+  else if (currentAngle > targetAngle)
+  { // 90 => 30
+    targetAngle = max(targetAngle, minAngle);
+    for (int nextAngle = currentAngle; nextAngle > targetAngle; nextAngle -= step)
+    {
+      nextAngle = max(nextAngle, minAngle);
+      Servo_write(servo, nextAngle);
+      delay(100);
+      lastAngle = nextAngle;
+    }
+  }
+  currentAngle = lastAngle;
+}
+
+void setup()
+{
   pinMode(PIN_GND, OUTPUT);
   digitalWrite(PIN_GND, LOW);
 
   pinMode(PIN_EYE, OUTPUT);
-
   servo = Servo_attach(PIN_SERVO);
 
   blink(2, true);
 
-  angle = ANGLE_MID;
-  Servo_write(servo, angle);
+  currentAngle = ANGLE_MID;
+  Servo_write(servo, currentAngle);
   delay(1000 * 3);
 }
 
-void loop() {
-  if (random(50) == 0) {
-    angle = ANGLE_MID;
-    Servo_write(servo, angle);
+void loop()
+{
+  if (random(7) == 0 && abs(currentAngle - 90) > 15)
+  {
+    moveServo(ANGLE_MID, random_minmax(1, 5));
+    delay(500);
+    blink(random_minmax(2, 4), true);
     delay(1000);
-    blink(5, true);
-    delay(1000);
+
+    isRightDir = (random(10) % 2) == 0;
   }
 
-  if (isDirChanged) {
-    angleStep = probability[random(10)];
-    if (isRightDir) {
-      maxAngle = random_minmax(115, 135);
-    } else {
-      minAngle = random_minmax(45, 90);
-    }
-  }
-
-  calculateServoAngle();
-
-  Servo_write(servo, angle);
-
-  if (isDirChanged) {
-    delay(1000);
-    if (75 < angle && angle < 115) {
-      blink(1, true);
-    } else {
-      blink(2, true);
-    }
+  if (isRightDir)
+  {
+    moveServo(random_minmax(115, 135), random_minmax(1, 8));
+    delay(500);
+    blink(random_minmax(2, 3), true);
     delay(1000);
   }
-
-  delay(1000 * 1);
+  else
+  {
+    moveServo(random_minmax(45, 90), random_minmax(1, 8));
+    delay(500);
+    blink(random_minmax(2, 3), true);
+    delay(1000);
+  }
+  isRightDir = !isRightDir;
 }
