@@ -16,6 +16,7 @@ int minAngle = 45;
 int maxAngle = 135;
 
 bool isRightDir = true; // true Right, false Left
+int blinkProb[7] = {0, 0, 0, 0, 2, 2, 3};
 
 void blink(int times, bool isOn)
 {
@@ -95,19 +96,22 @@ void loop()
     isRightDir = (random(10) % 2) == 0;
   }
 
+  int blinkCount = blinkProb[random(6)];
   if (isRightDir)
   {
-    moveServo(random_minmax(115, 135), random_minmax(1, 8));
-    delay(500);
-    blink(random_minmax(2, 3), true);
-    delay(1000);
+    moveServo(currentAngle + random_minmax(30, 100), random_minmax(1, 8));
   }
   else
   {
-    moveServo(random_minmax(45, 90), random_minmax(1, 8));
-    delay(500);
-    blink(random_minmax(2, 3), true);
-    delay(1000);
+    moveServo(currentAngle - random_minmax(30, 100), random_minmax(1, 8));
   }
+
+  if (blinkCount > 0)
+  {
+    delay(500);
+    blink(blinkCount, true);
+  }
+  delay(1000);
+
   isRightDir = !isRightDir;
 }
