@@ -9,11 +9,12 @@
 
 #define BRIGHT 197
 
+#define MIN_ANGLE 45
+#define MAX_ANGLE 135
+
 Servo servo;
 
 int currentAngle = 90; // 0~180. Center 90
-int minAngle = 45;
-int maxAngle = 135;
 
 bool isRightDir = true; // true Right, false Left
 int blinkProb[7] = {0, 0, 0, 0, 2, 2, 3};
@@ -44,26 +45,31 @@ void moveServo(int targetAngle, int step)
 {
   int lastAngle = currentAngle;
 
+  targetAngle = min(targetAngle, MAX_ANGLE);
+  targetAngle = max(targetAngle, MIN_ANGLE);
+
   if (currentAngle < targetAngle)
-  { // 30 => 90
-    targetAngle = min(targetAngle, maxAngle);
+  { // ex) 30 => 90
     for (int nextAngle = currentAngle; nextAngle < targetAngle; nextAngle += step)
     {
-      nextAngle = min(nextAngle, maxAngle);
-      Servo_write(servo, nextAngle);
-      delay(100);
-      lastAngle = nextAngle;
+      if (nextAngle < MAX_ANGLE)
+      {
+        Servo_write(servo, nextAngle);
+        delay(100);
+        lastAngle = nextAngle;
+      }
     }
   }
   else if (currentAngle > targetAngle)
-  { // 90 => 30
-    targetAngle = max(targetAngle, minAngle);
+  { // ex) 90 => 30
     for (int nextAngle = currentAngle; nextAngle > targetAngle; nextAngle -= step)
     {
-      nextAngle = max(nextAngle, minAngle);
-      Servo_write(servo, nextAngle);
-      delay(100);
-      lastAngle = nextAngle;
+      if (nextAngle > MIN_ANGLE)
+      {
+        Servo_write(servo, nextAngle);
+        delay(100);
+        lastAngle = nextAngle;
+      }
     }
   }
   currentAngle = lastAngle;
