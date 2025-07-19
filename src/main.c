@@ -3,9 +3,8 @@
 
 #define ANGLE_MID 90
 
-#define PIN_SERVO 9
-#define PIN_EYE 8
-#define PIN_GND 6
+#define PIN_SERVO PC7
+#define PIN_EYE PC6
 
 #define BRIGHT 197
 
@@ -77,9 +76,6 @@ void moveServo(int targetAngle, int step)
 
 void setup()
 {
-  pinMode(PIN_GND, OUTPUT);
-  digitalWrite(PIN_GND, LOW);
-
   pinMode(PIN_EYE, OUTPUT);
   servo = Servo_attach(PIN_SERVO);
 
